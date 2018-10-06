@@ -318,8 +318,9 @@ void MarlinSettings::postprocess() {
   #if DISABLED(NO_VOLUMETRICS)
     planner.calculate_volumetric_multipliers();
   #else
-    for (uint8_t i = COUNT(planner.e_factor); i--;)
+    for (uint8_t i = COUNT(planner.e_factor); i--;) {
       planner.refresh_e_factor(i);
+    }
   #endif
 
   #if HAS_HOME_OFFSET || ENABLED(DUAL_X_CARRIAGE)
@@ -363,16 +364,42 @@ void MarlinSettings::postprocess() {
   #define EEPROM_START() int eeprom_index = EEPROM_OFFSET; persistentStore.access_start()
   #define EEPROM_FINISH() persistentStore.access_finish()
   #define EEPROM_SKIP(VAR) eeprom_index += sizeof(VAR)
-  #define EEPROM_WRITE(VAR) persistentStore.write_data(eeprom_index, (uint8_t*)&VAR, sizeof(VAR), &working_crc)
+
+  #if ENABLED(DEBUG_EEPROM_READWRITE)
+  #define EEPROM_WRITE(VAR) \
+    SERIAL_ERROR_START_P(port); \
+    SERIAL_ERRORPGM_P(port, "Saving field " STRINGIFY(VAR) " at index"); \
+    SERIAL_ERROR_P(port, eeprom_index); \
+    SERIAL_ERRORPGM_P(port, " as size: "); \
+    SERIAL_ERRORLN_P(port, sizeof(VAR)); \
+    persistentStore.write_data(eeprom_index, (uint8_t*)&VAR, sizeof(VAR), &working_crc)
+  #else
+    #define EEPROM_WRITE(VAR) persistentStore.write_data(eeprom_index, (uint8_t*)&VAR, sizeof(VAR), &working_crc)
+  #endif
+
   #define EEPROM_READ(VAR) persistentStore.read_data(eeprom_index, (uint8_t*)&VAR, sizeof(VAR), &working_crc, !validating)
   #define EEPROM_READ_ALWAYS(VAR) persistentStore.read_data(eeprom_index, (uint8_t*)&VAR, sizeof(VAR), &working_crc)
   #define EEPROM_ASSERT(TST,ERR) if (!(TST)) do{ SERIAL_ERROR_START_P(port); SERIAL_ERRORLNPGM_P(port, ERR); eeprom_error = true; }while(0)
 
+  #define EEPROM_FIELD_ASSERT(TST,ERR,EXPECTEDOFFST) \
+    SERIAL_ERROR_START_P(port); \
+    SERIAL_ERRORLNPGM_P(port, "Checking " ERR); \
+  if (!(TST)) do{ \
+    SERIAL_ERROR_START_P(port); \
+    SERIAL_ERRORLNPGM_P(port, ERR " mismatch."); \
+    SERIAL_ERRORPGM_P(port, "Offset Actual: "); \
+    SERIAL_ERROR_P(port, eeprom_index); \
+    SERIAL_ERRORPGM_P(port, ". Expected: "); \
+    SERIAL_ERRORLN_P(port, EXPECTEDOFFST); \
+    eeprom_error = true; \
+  }while(0)
+
   #if ENABLED(DEBUG_EEPROM_READWRITE)
     #define _FIELD_TEST(FIELD) \
-      EEPROM_ASSERT( \
+      EEPROM_FIELD_ASSERT( \
         eeprom_error || eeprom_index == offsetof(SettingsData, FIELD) + EEPROM_OFFSET, \
-        "Field " STRINGIFY(FIELD) " mismatch." \
+        "Field " STRINGIFY(FIELD), \
+        offsetof(SettingsData, FIELD) + EEPROM_OFFSET \
       )
   #else
     #define _FIELD_TEST(FIELD) NOOP
@@ -386,7 +413,12 @@ void MarlinSettings::postprocess() {
     if (size != datasize()) {
       #if ENABLED(EEPROM_CHITCHAT)
         SERIAL_ERROR_START_P(port);
-        SERIAL_ERRORLNPGM_P(port, "EEPROM datasize error.");
+        // SERIAL_ERRORLNPGM_P(port, "EEPROM datasize error.");
+        SERIAL_ERRORPGM_P(port, "EEPROM datasize error. Expected: ");
+        SERIAL_ERROR_P(port, datasize());
+        SERIAL_ERRORPGM_P(port, ". Received: ");
+        SERIAL_ERROR_P(port, size);
+        SERIAL_ERRORLNPGM_P(port, ".");
       #endif
       return true;
     }
@@ -456,8 +488,11 @@ void MarlinSettings::postprocess() {
 
     #if HAS_HOTEND_OFFSET
       // Skip hotend 0 which must be 0
-      for (uint8_t e = 1; e < HOTENDS; e++)
-        LOOP_XYZ(i) EEPROM_WRITE(hotend_offset[i][e]);
+      for (uint8_t e = 1; e < HOTENDS; e++) {
+        LOOP_XYZ(i) {
+          EEPROM_WRITE(hotend_offset[i][e]);
+        }
+      }
     #endif
 
     //
@@ -492,7 +527,9 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(dummy); // z_offset
       EEPROM_WRITE(mesh_num_x);
       EEPROM_WRITE(mesh_num_y);
-      for (uint8_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = mesh_num_x * mesh_num_y; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #endif // MESH_BED_LEVELING
 
     _FIELD_TEST(zprobe_zoffset);
@@ -510,7 +547,9 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(planner.bed_level_matrix);
     #else
       dummy = 0;
-      for (uint8_t q = 9; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = 9; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #endif
 
     //
@@ -538,7 +577,9 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(grid_max_y);
       EEPROM_WRITE(bilinear_grid_spacing);
       EEPROM_WRITE(bilinear_start);
-      for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_WRITE(dummy);
+      for (uint16_t q = grid_max_x * grid_max_y; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #endif // AUTO_BED_LEVELING_BILINEAR
 
     _FIELD_TEST(planner_leveling_active);
@@ -571,7 +612,11 @@ void MarlinSettings::postprocess() {
       };
     #endif
 
-    EEPROM_WRITE(servo_angles);
+    _FIELD_TEST(servo_angles);
+
+    for (uint16_t i = 0; i < NUM_SERVO_PLUGS; i++) {
+      EEPROM_WRITE(servo_angles[i]);
+    }
 
     // 11 floats for DELTA / [XYZ]_DUAL_ENDSTOPS
     #if ENABLED(DELTA)
@@ -645,7 +690,9 @@ void MarlinSettings::postprocess() {
         dummy = DUMMY_PID_VALUE; // When read, will not change the existing value
         EEPROM_WRITE(dummy); // Kp
         dummy = 0;
-        for (uint8_t q = 3; q--;) EEPROM_WRITE(dummy); // Ki, Kd, Kc
+        for (uint8_t q = 3; q--;) {
+          EEPROM_WRITE(dummy); // Ki, Kd, Kc
+        }
       #endif
     } // Hotends Loop
 
@@ -658,7 +705,9 @@ void MarlinSettings::postprocess() {
 
     #if DISABLED(PIDTEMPBED)
       dummy = DUMMY_PID_VALUE;
-      for (uint8_t q = 3; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = 3; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #else
       EEPROM_WRITE(thermalManager.bedKp);
       EEPROM_WRITE(thermalManager.bedKi);
@@ -706,15 +755,18 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(parser.volumetric_enabled);
 
       // Save filament sizes
-      for (uint8_t q = 0; q < COUNT(planner.filament_size); q++)
+      for (uint8_t q = 0; q < COUNT(planner.filament_size); q++) {
         EEPROM_WRITE(planner.filament_size[q]);
+      }
 
     #else
 
       const bool volumetric_enabled = false;
       dummy = DEFAULT_NOMINAL_FILAMENT_DIA;
       EEPROM_WRITE(volumetric_enabled);
-      for (uint8_t q = EXTRUDERS; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = EXTRUDERS; q--;) {
+        EEPROM_WRITE(dummy);
+      }
 
     #endif
 
@@ -960,7 +1012,9 @@ void MarlinSettings::postprocess() {
     _FIELD_TEST(motor_current_setting);
 
     #if HAS_MOTOR_CURRENT_PWM
-      for (uint8_t q = XYZ; q--;) EEPROM_WRITE(stepper.motor_current_setting[q]);
+      for (uint8_t q = XYZ; q--;) {
+        EEPROM_WRITE(stepper.motor_current_setting[q]);
+      }
     #else
       const uint32_t dummyui32[XYZ] = { 0 };
       EEPROM_WRITE(dummyui32);
@@ -976,7 +1030,9 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(gcode.coordinate_system); // 27 floats
     #else
       dummy = 0;
-      for (uint8_t q = MAX_COORDINATE_SYSTEMS * XYZ; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = MAX_COORDINATE_SYSTEMS * XYZ; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #endif
 
     //
@@ -991,7 +1047,9 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(planner.yz_skew_factor);
     #else
       dummy = 0;
-      for (uint8_t q = 3; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = 3; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #endif
 
     //
@@ -1007,7 +1065,9 @@ void MarlinSettings::postprocess() {
       }
     #else
       dummy = 0;
-      for (uint8_t q = EXTRUDERS * 2; q--;) EEPROM_WRITE(dummy);
+      for (uint8_t q = EXTRUDERS * 2; q--;) {
+        EEPROM_WRITE(dummy);
+      }
     #endif
 
     //
@@ -1122,7 +1182,9 @@ void MarlinSettings::postprocess() {
           EEPROM_READ(dummy);
         #endif
       #else
-        for (uint8_t q = 4; q--;) EEPROM_READ(dummy);
+        for (uint8_t q = 4; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif
 
       #if ENABLED(JUNCTION_DEVIATION)
@@ -1148,8 +1210,9 @@ void MarlinSettings::postprocess() {
 
       #if HAS_HOTEND_OFFSET
         // Skip hotend 0 which must be 0
-        for (uint8_t e = 1; e < HOTENDS; e++)
+        for (uint8_t e = 1; e < HOTENDS; e++) {
           LOOP_XYZ(i) EEPROM_READ(hotend_offset[i][e]);
+        }
       #endif
 
       //
@@ -1180,11 +1243,15 @@ void MarlinSettings::postprocess() {
         else {
           // EEPROM data is stale
           if (!validating) mbl.reset();
-          for (uint16_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_READ(dummy);
+          for (uint16_t q = mesh_num_x * mesh_num_y; q--;) {
+            EEPROM_READ(dummy);
+          }
         }
       #else
         // MBL is disabled - skip the stored data
-        for (uint16_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_READ(dummy);
+        for (uint16_t q = mesh_num_x * mesh_num_y; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif // MESH_BED_LEVELING
 
       _FIELD_TEST(zprobe_zoffset);
@@ -1201,7 +1268,9 @@ void MarlinSettings::postprocess() {
       #if ABL_PLANAR
         EEPROM_READ(planner.bed_level_matrix);
       #else
-        for (uint8_t q = 9; q--;) EEPROM_READ(dummy);
+        for (uint8_t q = 9; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif
 
       //
@@ -1225,7 +1294,9 @@ void MarlinSettings::postprocess() {
           int bgs[2], bs[2];
           EEPROM_READ(bgs);
           EEPROM_READ(bs);
-          for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_READ(dummy);
+          for (uint16_t q = grid_max_x * grid_max_y; q--;) {
+            EEPROM_READ(dummy);
+          }
         }
 
       //
@@ -1249,7 +1320,11 @@ void MarlinSettings::postprocess() {
       #if !HAS_SERVOS || DISABLED(EDITABLE_SERVO_ANGLES)
         uint16_t servo_angles[NUM_SERVO_PLUGS][2];
       #endif
-      EEPROM_READ(servo_angles);
+
+      _FIELD_TEST(servo_angles);
+      for (uint16_t i = 0; i < NUM_SERVO_PLUGS; i++) {
+        EEPROM_READ(servo_angles[i]);
+      }
 
       //
       // DELTA Geometry or Dual Endstops offsets
@@ -1331,11 +1406,15 @@ void MarlinSettings::postprocess() {
             #endif
           }
           else
-            for (uint8_t q=3; q--;) EEPROM_READ(dummy); // Ki, Kd, Kc
+            for (uint8_t q=3; q--;) {
+              EEPROM_READ(dummy); // Ki, Kd, Kc
+            }
         }
       #else // !PIDTEMP
         // 4 x 4 = 16 slots for PID parameters
-        for (uint8_t q = HOTENDS * 4; q--;) EEPROM_READ(dummy);  // Kp, Ki, Kd, Kc
+        for (uint8_t q = HOTENDS * 4; q--;) {
+          EEPROM_READ(dummy);  // Kp, Ki, Kd, Kc
+        }
       #endif // !PIDTEMP
 
       //
@@ -1361,7 +1440,9 @@ void MarlinSettings::postprocess() {
           EEPROM_READ(thermalManager.bedKd);
         }
       #else
-        for (uint8_t q=3; q--;) EEPROM_READ(dummy); // bedKp, bedKi, bedKd
+        for (uint8_t q=3; q--;) {
+          EEPROM_READ(dummy); // bedKp, bedKi, bedKd
+        }
       #endif
 
       //
@@ -1395,7 +1476,9 @@ void MarlinSettings::postprocess() {
         EEPROM_READ(fwretract.swap_retract_recover_feedrate_mm_s);
       #else
         EEPROM_READ(dummyb);
-        for (uint8_t q=8; q--;) EEPROM_READ(dummy);
+        for (uint8_t q=8; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif
 
       //
@@ -1416,7 +1499,9 @@ void MarlinSettings::postprocess() {
       #else
 
         EEPROM_READ(dummyb);
-        for (uint8_t q=EXTRUDERS; q--;) EEPROM_READ(dummy);
+        for (uint8_t q=EXTRUDERS; q--;) {
+          EEPROM_READ(dummy);
+        }
 
       #endif
 
@@ -1476,7 +1561,9 @@ void MarlinSettings::postprocess() {
         }
       #else
         uint16_t val;
-        for (uint8_t q=TMC_AXES; q--;) EEPROM_READ(val);
+        for (uint8_t q=TMC_AXES; q--;) {
+          EEPROM_READ(val);
+        }
       #endif
 
       #if ENABLED(HYBRID_THRESHOLD)
@@ -1526,7 +1613,9 @@ void MarlinSettings::postprocess() {
         }
       #else
         uint32_t thrs_val;
-        for (uint8_t q=TMC_AXES; q--;) EEPROM_READ(thrs_val);
+        for (uint8_t q=TMC_AXES; q--;) {
+          EEPROM_READ(thrs_val);
+        }
       #endif
 
       /*
@@ -1589,7 +1678,9 @@ void MarlinSettings::postprocess() {
       _FIELD_TEST(motor_current_setting);
 
       #if HAS_MOTOR_CURRENT_PWM
-        for (uint8_t q = XYZ; q--;) EEPROM_READ(stepper.motor_current_setting[q]);
+        for (uint8_t q = XYZ; q--;) {
+          EEPROM_READ(stepper.motor_current_setting[q]);
+        }
       #else
         uint32_t dummyui32[XYZ];
         EEPROM_READ(dummyui32);
@@ -1605,7 +1696,9 @@ void MarlinSettings::postprocess() {
         if (!validating) (void)gcode.select_coordinate_system(-1); // Go back to machine space
         EEPROM_READ(gcode.coordinate_system);                  // 27 floats
       #else
-        for (uint8_t q = MAX_COORDINATE_SYSTEMS * XYZ; q--;) EEPROM_READ(dummy);
+        for (uint8_t q = MAX_COORDINATE_SYSTEMS * XYZ; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif
 
       //
@@ -1624,7 +1717,9 @@ void MarlinSettings::postprocess() {
           EEPROM_READ(dummy);
         #endif
       #else
-        for (uint8_t q = 3; q--;) EEPROM_READ(dummy);
+        for (uint8_t q = 3; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif
 
       //
@@ -1641,7 +1736,9 @@ void MarlinSettings::postprocess() {
           if (!validating && q < COUNT(filament_change_load_length)) filament_change_load_length[q] = dummy;
         }
       #else
-        for (uint8_t q = EXTRUDERS * 2; q--;) EEPROM_READ(dummy);
+        for (uint8_t q = EXTRUDERS * 2; q--;) {
+          EEPROM_READ(dummy);
+        }
       #endif
 
       eeprom_error = size_error(eeprom_index - (EEPROM_OFFSET));
