@@ -65,6 +65,7 @@
  * G33  - Delta Auto-Calibration (Requires DELTA_AUTO_CALIBRATION)
  * G38  - Probe in any direction using the Z_MIN_PROBE (Requires G38_PROBE_TARGET)
  * G42  - Coordinated move to a mesh point (Requires MESH_BED_LEVELING, AUTO_BED_LEVELING_BLINEAR, or AUTO_BED_LEVELING_UBL)
+ * G80  - Cancel current motion mode (Requires GCODE_MOTION_MODES)
  * G90  - Use Absolute Coordinates
  * G91  - Use Relative Coordinates
  * G92  - Set current position to coordinates given
@@ -428,6 +429,10 @@ private:
     static void G59();
   #endif
 
+  #if ENABLED(GCODE_MOTION_MODES)
+    static void G80();
+  #endif
+
   static void G92();
 
   #if HAS_RESUME_CONTINUE
@@ -775,8 +780,10 @@ private:
       static void M122();
     #endif
     static void M906();
-    static void M911();
-    static void M912();
+    #if ENABLED(MONITOR_DRIVER_STATUS)
+      static void M911();
+      static void M912();
+    #endif
     #if ENABLED(HYBRID_THRESHOLD)
       static void M913();
     #endif
