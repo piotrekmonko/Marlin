@@ -35,7 +35,6 @@
  *       either sets a Sane Default, or results in No Change to the existing value.
  *
  */
-
 // Change EEPROM version if the structure changes
 #define EEPROM_VERSION "V61"
 #define EEPROM_OFFSET 100
@@ -45,6 +44,7 @@
 //#define DEBUG_EEPROM_READWRITE
 
 #include "configuration_store.h"
+#include <Wire.h>
 
 #if ADD_PORT_ARG
   #define PORTARG_SOLO     const int8_t port
@@ -422,6 +422,7 @@ void MarlinSettings::postprocess() {
     uint16_t working_crc = 0;
 
     EEPROM_START();
+    Wire.begin();
 
     eeprom_error = false;
     #if ENABLED(FLASH_EEPROM_EMULATION)
@@ -992,6 +993,7 @@ void MarlinSettings::postprocess() {
     uint16_t working_crc = 0;
 
     EEPROM_START();
+    Wire.begin();
 
     char stored_ver[4];
     EEPROM_READ_ALWAYS(stored_ver);

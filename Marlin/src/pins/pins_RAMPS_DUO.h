@@ -130,3 +130,25 @@
   #endif // NEWPANEL
 
 #endif // ULTRA_LCD
+
+
+// panel
+#undef BTN_ENC
+#define BTN_ENC 16
+
+#undef BTN_EN1
+#define BTN_EN1 17
+
+#undef BTN_EN2
+#define BTN_EN2      23
+
+// #define BTN_BACK     27
+
+#undef KILL_PIN
+// #define KILL_PIN     67
+
+#undef BEEPER_PIN
+#define BEEPER_PIN       42
+
+#undef SD_DETECT_PIN
+#define SD_DETECT_PIN    32

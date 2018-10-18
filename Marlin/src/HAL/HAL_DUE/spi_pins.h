@@ -28,6 +28,14 @@
  *
  * Available chip select pins for HW SPI are 4 10 52 77
  */
+#define USE_DUE_HW_SPI
+#ifdef USE_DUE_HW_SPI
+  #ifdef SDSS
+    #undef SDSS
+  #endif
+  #define SDSS              52
+#endif
+
 #if (SDSS == 4) || (SDSS == 10) || (SDSS == 52) || (SDSS == 77)
   #if (SDSS == 4)
     #define SPI_PIN         87
