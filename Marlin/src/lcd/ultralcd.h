@@ -253,6 +253,12 @@
       #define LCD_BACK_CLICKED (buttons & EN_D)
     #endif
 
+    #if BUTTON_EXISTS(MENU_HOP)
+      #define BLEN_E 4
+      #define EN_E _BV(BLEN_E)
+      #define LCD_MENU_HOP_CLICKED (buttons & EN_E)
+    #endif
+
   #endif // NEWPANEL
 
   extern volatile uint8_t buttons;  // The last-checked buttons in a bit array.

@@ -142,8 +142,6 @@
 #undef BTN_EN2
 #define BTN_EN2      23
 
-// #define BTN_BACK     27
-
 #undef KILL_PIN
 // #define KILL_PIN     67
 
@@ -152,3 +150,8 @@
 
 #undef SD_DETECT_PIN
 #define SD_DETECT_PIN    32
+
+// toggle info screen/last menu position
+#define BTN_MENU_HOP     25
+
+// #define BTN_BACK     27

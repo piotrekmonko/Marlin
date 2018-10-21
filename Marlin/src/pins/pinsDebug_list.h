@@ -142,6 +142,9 @@
 #if defined(BTN_ENC) && BTN_ENC >= 0
   REPORT_NAME_DIGITAL(__LINE__, BTN_ENC)
 #endif
+#if defined(BTN_MENU_HOP) && BTN_MENU_HOP >= 0
+  REPORT_NAME_DIGITAL(__LINE__, BTN_MENU_HOP)
+#endif
 #if defined(BTN_HOME) && BTN_HOME >= 0
   REPORT_NAME_DIGITAL(__LINE__, BTN_HOME)
 #endif

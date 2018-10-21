@@ -49,8 +49,9 @@
 // i2c oled 128x64 screen
 #define ULTIPANEL
 #define NEWPANEL
-#define U8GLIB_SSD1306
-//#define U8GLIB_SSD1306_SPI
+#define U8GLIB_SH1106
+// #define U8GLIB_SSD1306
+// #define U8GLIB_SSD1306_SPI
 
 //===========================================================================
 //============================= Getting Started =============================

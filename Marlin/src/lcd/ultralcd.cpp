@@ -465,6 +465,10 @@ millis_t next_lcd_update_ms;
   } menuPosition;
   menuPosition screen_history[6];
   uint8_t screen_history_depth = 0;
+  menuPosition prev_history[6];
+  uint8_t prev_history_depth = 0;
+  screenFunc_t prev_currentScreen = lcd_status_screen;
+  uint32_t prev_encoderPosition;
   bool screen_changed, defer_return_to_status;
 
   // Value Editing
@@ -632,6 +636,35 @@ millis_t next_lcd_update_ms;
     }
     else
       lcd_return_to_status();
+  }
+
+  void _save_history() {
+    prev_history_depth = screen_history_depth;
+    prev_currentScreen = currentScreen;
+    prev_encoderPosition = encoderPosition;
+    for (uint8_t i = 0; i < COUNT(screen_history); i ++) {
+      prev_history[i].menu_function = screen_history[i].menu_function;
+      prev_history[i].encoder_position = screen_history[i].encoder_position;
+    }
+  }
+
+  void _restore_history() {
+    screen_history_depth = prev_history_depth;
+    for (uint8_t i = 0; i < COUNT(screen_history); i ++) {
+      screen_history[i].menu_function = prev_history[i].menu_function;
+      screen_history[i].encoder_position = prev_history[i].encoder_position;
+    }
+  }
+
+  void lcd_menu_hop() {
+    if (currentScreen != lcd_status_screen ) {
+      _save_history();
+      lcd_return_to_status();
+    }
+    else if (currentScreen == lcd_status_screen && prev_currentScreen != lcd_status_screen) {
+      _restore_history();
+      lcd_goto_screen(prev_currentScreen, prev_encoderPosition);
+    }
   }
 
   void lcd_goto_previous_menu_no_defer() {
@@ -5322,6 +5355,9 @@ void lcd_init() {
     #if BUTTON_EXISTS(ENC)
       SET_INPUT_PULLUP(BTN_ENC);
     #endif
+    #if BUTTON_EXISTS(MENU_HOP)
+      SET_INPUT_PULLUP(BTN_MENU_HOP);
+    #endif
 
     #if ENABLED(REPRAPWORLD_KEYPAD) && DISABLED(ADC_KEYPAD)
       SET_OUTPUT(SHIFT_CLK);
@@ -5450,6 +5486,13 @@ void lcd_update() {
       if (LCD_BACK_CLICKED) {
         lcd_quick_feedback(true);
         lcd_goto_previous_menu();
+      }
+    #endif
+
+    #if BUTTON_EXISTS(MENU_HOP)
+      if (LCD_MENU_HOP_CLICKED) {
+        lcd_quick_feedback(true);
+        lcd_menu_hop();
       }
     #endif
 
@@ -5853,6 +5896,9 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
         #endif
         #if BUTTON_EXISTS(BACK)
           if (BUTTON_PRESSED(BACK)) newbutton |= EN_D;
+        #endif
+        #if BUTTON_EXISTS(MENU_HOP)
+          if (BUTTON_PRESSED(MENU_HOP)) newbutton |= EN_E;
         #endif
 
         //
