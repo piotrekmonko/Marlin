@@ -146,7 +146,7 @@
 // #define KILL_PIN     67
 
 #undef BEEPER_PIN
-#define BEEPER_PIN       42
+//#define BEEPER_PIN       42
 
 #undef SD_DETECT_PIN
 #define SD_DETECT_PIN    32
@@ -155,3 +155,32 @@
 #define BTN_MENU_HOP     25
 
 // #define BTN_BACK     27
+
+// swap E0-E1
+#undef E0_STEP_PIN
+#undef E0_DIR_PIN
+#undef E0_ENABLE_PIN
+#ifdef E0_CS_PIN
+  #undef E0_CS_PIN
+#endif
+#undef E1_STEP_PIN
+#undef E1_DIR_PIN
+#undef E1_ENABLE_PIN
+#ifdef E1_CS_PIN
+  #undef E1_CS_PIN
+#endif
+
+#define E0_STEP_PIN        36
+#define E0_DIR_PIN         34
+#define E0_ENABLE_PIN      30
+#define E0_CS_PIN          44
+
+#ifdef CONTROLLER_FAN_PIN
+  #undef CONTROLLER_FAN_PIN
+#endif
+#define CONTROLLER_FAN_PIN 4
+
+#ifdef CASE_LIGHT_PIN
+  #undef CASE_LIGHT_PIN
+#endif
+#define CASE_LIGHT_PIN     5
