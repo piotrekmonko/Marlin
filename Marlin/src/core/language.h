@@ -19,9 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef LANGUAGE_H
-#define LANGUAGE_H
+#pragma once
 
 #include "../inc/MarlinConfig.h"
 
@@ -131,6 +129,7 @@
 #define MSG_M115_REPORT                     "FIRMWARE_NAME:Marlin " DETAILED_BUILD_VERSION " SOURCE_CODE_URL:" SOURCE_CODE_URL " PROTOCOL_VERSION:" PROTOCOL_VERSION " MACHINE_TYPE:" MACHINE_NAME " EXTRUDER_COUNT:" STRINGIFY(EXTRUDERS) " UUID:" MACHINE_UUID
 #define MSG_COUNT_X                         " Count X:"
 #define MSG_COUNT_A                         " Count A:"
+#define MSG_WATCHDOG_FIRED                  "Watchdog timeout. Reset required."
 #define MSG_ERR_KILLED                      "Printer halted. kill() called!"
 #define MSG_ERR_STOPPED                     "Printer stopped due to errors. Fix the error and use M999 to restart. (Temperature is reset. Set it after restarting)"
 #define MSG_BUSY_PROCESSING                 "busy: processing"
@@ -199,14 +198,17 @@
 #define MSG_ENDSTOPS_HIT                    "endstops hit: "
 #define MSG_ERR_COLD_EXTRUDE_STOP           " cold extrusion prevented"
 #define MSG_ERR_LONG_EXTRUDE_STOP           " too long extrusion prevented"
-#define MSG_HOTEND_TOO_COLD                 "Hotend too cold"
+#define MSG_ERR_HOTEND_TOO_COLD             "Hotend too cold"
 
 #define MSG_FILAMENT_CHANGE_HEAT            "Press button (or M108) to heat nozzle"
 #define MSG_FILAMENT_CHANGE_INSERT          "Insert filament and press button (or M108)"
+#define MSG_FILAMENT_CHANGE_WAIT            "Press button (or M108) to resume"
 #define MSG_FILAMENT_CHANGE_HEAT_LCD        "Press button to heat nozzle"
 #define MSG_FILAMENT_CHANGE_INSERT_LCD      "Insert filament and press button"
+#define MSG_FILAMENT_CHANGE_WAIT_LCD        "Press button to resume"
 #define MSG_FILAMENT_CHANGE_HEAT_M108       "Send M108 to heat nozzle"
 #define MSG_FILAMENT_CHANGE_INSERT_M108     "Insert filament and send M108"
+#define MSG_FILAMENT_CHANGE_WAIT_M108       "Send M108 to resume"
 
 #define MSG_ERR_EEPROM_WRITE                "Error writing to EEPROM!"
 
@@ -263,7 +265,7 @@
 
 // LCD Menu Messages
 
-#define LANGUAGE_DATA_INCL_(M) STRINGIFY_(../lcd/dogm/language_data_##M.h)
+#define LANGUAGE_DATA_INCL_(M) STRINGIFY_(fontdata/langdata_##M.h)
 #define LANGUAGE_DATA_INCL(M) LANGUAGE_DATA_INCL_(M)
 #define INCLUDE_LANGUAGE_DATA LANGUAGE_DATA_INCL(LCD_LANGUAGE)
 
@@ -295,12 +297,12 @@
 #define MSG_H4 "4"
 #define MSG_H5 "5"
 #define MSG_H6 "6"
-#define MSG_N1 " 1"
-#define MSG_N2 " 2"
-#define MSG_N3 " 3"
-#define MSG_N4 " 4"
-#define MSG_N5 " 5"
-#define MSG_N6 " 6"
+#define MSG_LCD_N0 " 1"
+#define MSG_LCD_N1 " 2"
+#define MSG_LCD_N2 " 3"
+#define MSG_LCD_N3 " 4"
+#define MSG_LCD_N4 " 5"
+#define MSG_LCD_N5 " 6"
 #define MSG_E0 "E0"
 #define MSG_E1 "E1"
 #define MSG_E2 "E2"
@@ -341,5 +343,3 @@
   #undef MSG_USER_MENU
   #define MSG_USER_MENU CUSTOM_USER_MENU_TITLE
 #endif
-
-#endif // __LANGUAGE_H

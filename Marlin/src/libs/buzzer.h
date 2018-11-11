@@ -19,16 +19,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef __BUZZER_H__
-#define __BUZZER_H__
+#pragma once
 
 #include "../inc/MarlinConfig.h"
 
 // Make a buzzer and macro
 #if ENABLED(LCD_USE_I2C_BUZZER)
   // BUZZ() will be defined in ultralcd.h
-#elif PIN_EXISTS(BEEPER) || ENABLED(EXTENSIBLE_UI)
+#elif PIN_EXISTS(BEEPER)
 
 #include "circularqueue.h"
 
@@ -121,7 +119,5 @@ class Buzzer {
 #else // No buzz capability
 
   #define BUZZ(d,f) NOOP
-
-#endif
 
 #endif

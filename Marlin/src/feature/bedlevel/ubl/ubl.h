@@ -19,9 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef UNIFIED_BED_LEVELING_H
-#define UNIFIED_BED_LEVELING_H
+#pragma once
 
 //#define UBL_DEVEL_DEBUGGING
 
@@ -52,8 +50,6 @@ enum MeshPointType : char { INVALID, REAL, SET_IN_BITMAP };
 // External references
 
 extern uint8_t ubl_cnt;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if ENABLED(ULTRA_LCD)
   void lcd_quick_feedback(const bool clear_buttons);
@@ -157,7 +153,7 @@ class unified_bed_leveling {
                               MESH_MIN_Y + 14 * (MESH_Y_DIST), MESH_MIN_Y + 15 * (MESH_Y_DIST)
                             };
 
-    #if ENABLED(ULTIPANEL)
+    #if HAS_LCD_MENU
       static bool lcd_map_control;
     #endif
 
@@ -348,11 +344,11 @@ class unified_bed_leveling {
       return z0;
     }
 
-    FORCE_INLINE static float mesh_index_to_xpos(const uint8_t i) {
+    static inline float mesh_index_to_xpos(const uint8_t i) {
       return i < GRID_MAX_POINTS_X ? pgm_read_float(&_mesh_index_to_xpos[i]) : MESH_MIN_X + i * (MESH_X_DIST);
     }
 
-    FORCE_INLINE static float mesh_index_to_ypos(const uint8_t i) {
+    static inline float mesh_index_to_ypos(const uint8_t i) {
       return i < GRID_MAX_POINTS_Y ? pgm_read_float(&_mesh_index_to_ypos[i]) : MESH_MIN_Y + i * (MESH_Y_DIST);
     }
 
@@ -373,4 +369,4 @@ class unified_bed_leveling {
 
 extern unified_bed_leveling ubl;
 
-#endif // UNIFIED_BED_LEVELING_H
+#define Z_VALUES(X,Y) ubl.z_values[X][Y]

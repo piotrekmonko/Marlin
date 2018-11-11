@@ -38,6 +38,7 @@
 #include "../../module/planner.h"
 #include "../../module/stepper.h"
 #include "../../module/motion.h"
+#include "../../module/tool_change.h"
 #include "../../module/temperature.h"
 #include "../../lcd/ultralcd.h"
 
@@ -124,8 +125,8 @@
  *   S #  Nozzle      Used to control the size of nozzle diameter. If not specified, a .4mm nozzle is assumed.
  *
  *   U #  Random      Randomize the order that the circles are drawn on the bed. The search for the closest
- *                    undrawn cicle is still done. But the distance to the location for each circle has a
- *                    random number of the size specified added to it. Specifying S50 will give an interesting
+ *                    un-drawn circle is still done. But the distance to the location for each circle has a
+ *                    random number of the specified size added to it. Specifying S50 will give an interesting
  *                    deviation from the normal behaviour on a 10 x 10 Mesh.
  *
  *   X #  X Coord.    Specify the starting location of the drawing activity.
@@ -156,7 +157,7 @@ int16_t g26_bed_temp,
 
 int8_t g26_prime_flag;
 
-#if ENABLED(ULTIPANEL)
+#if HAS_LCD_MENU
 
   /**
    * If the LCD is clicked, cancel, wait for release, return true
@@ -164,17 +165,11 @@ int8_t g26_prime_flag;
   bool user_canceled() {
     if (!is_lcd_clicked()) return false; // Return if the button isn't pressed
     lcd_setstatusPGM(PSTR("Mesh Validation Stopped."), 99);
-    #if ENABLED(ULTIPANEL)
-      lcd_quick_feedback(true);
+    #if HAS_LCD_MENU
+      lcd_quick_feedback();
     #endif
     wait_for_release();
     return true;
-  }
-
-  bool exit_from_g26() {
-    lcd_setstatusPGM(PSTR("Leaving G26"), -1);
-    wait_for_release();
-    return G26_ERR;
   }
 
 #endif
@@ -327,7 +322,7 @@ inline bool look_for_lines_to_connect() {
   for (uint8_t i = 0; i < GRID_MAX_POINTS_X; i++) {
     for (uint8_t j = 0; j < GRID_MAX_POINTS_Y; j++) {
 
-      #if ENABLED(ULTIPANEL)
+      #if HAS_LCD_MENU
         if (user_canceled()) return true;     // Check if the user wants to stop the Mesh Validation
       #endif
 
@@ -412,58 +407,50 @@ inline bool look_for_lines_to_connect() {
  * wait for them to get up to temperature.
  */
 inline bool turn_on_heaters() {
-  millis_t next = millis() + 5000UL;
+
+  SERIAL_ECHOLNPGM("Waiting for heatup.");
+
   #if HAS_HEATED_BED
-    #if ENABLED(ULTRA_LCD)
-      if (g26_bed_temp > 25) {
+
+    if (g26_bed_temp > 25) {
+      #if ENABLED(ULTRA_LCD)
         lcd_setstatusPGM(PSTR("G26 Heating Bed."), 99);
-        lcd_quick_feedback(true);
-        #if ENABLED(ULTIPANEL)
+        lcd_quick_feedback();
+        #if HAS_LCD_MENU
           lcd_external_control = true;
         #endif
-    #endif
-        thermalManager.setTargetBed(g26_bed_temp);
-        while (ABS(thermalManager.degBed() - g26_bed_temp) > 3) {
+      #endif
+      thermalManager.setTargetBed(g26_bed_temp);
 
-          #if ENABLED(ULTIPANEL)
-            if (is_lcd_clicked()) return exit_from_g26();
+      // Wait for the temperature to stabilize
+      if (!thermalManager.wait_for_bed(true
+          #if G26_CLICK_CAN_CANCEL
+            , true
           #endif
-
-          if (ELAPSED(millis(), next)) {
-            next = millis() + 5000UL;
-            thermalManager.print_heaterstates();
-            SERIAL_EOL();
-          }
-          idle();
-          SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
-        }
-    #if ENABLED(ULTRA_LCD)
-      }
-      lcd_setstatusPGM(PSTR("G26 Heating Nozzle."), 99);
-      lcd_quick_feedback(true);
-    #endif
-  #endif
-
-  // Start heating the nozzle and wait for it to reach temperature.
-  thermalManager.setTargetHotend(g26_hotend_temp, 0);
-  while (ABS(thermalManager.degHotend(0) - g26_hotend_temp) > 3) {
-
-    #if ENABLED(ULTIPANEL)
-      if (is_lcd_clicked()) return exit_from_g26();
-    #endif
-
-    if (ELAPSED(millis(), next)) {
-      next = millis() + 5000UL;
-      thermalManager.print_heaterstates();
-      SERIAL_EOL();
+        )
+      ) return G26_ERR;
     }
-    idle();
-    SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
-  }
+
+  #endif // HAS_HEATED_BED
+
+  // Start heating the active nozzle
+  #if ENABLED(ULTRA_LCD)
+    lcd_setstatusPGM(PSTR("G26 Heating Nozzle."), 99);
+    lcd_quick_feedback();
+  #endif
+  thermalManager.setTargetHotend(g26_hotend_temp, active_extruder);
+
+  // Wait for the temperature to stabilize
+  if (!thermalManager.wait_for_hotend(active_extruder, true
+      #if G26_CLICK_CAN_CANCEL
+        , true
+      #endif
+    )
+  ) return G26_ERR;
 
   #if ENABLED(ULTRA_LCD)
     lcd_reset_status();
-    lcd_quick_feedback(true);
+    lcd_quick_feedback();
   #endif
 
   return G26_OK;
@@ -474,7 +461,7 @@ inline bool turn_on_heaters() {
  */
 inline bool prime_nozzle() {
 
-  #if ENABLED(ULTIPANEL)
+  #if HAS_LCD_MENU
     #if ENABLED(PREVENT_LENGTHY_EXTRUDE)
       float Total_Prime = 0.0;
     #endif
@@ -507,7 +494,7 @@ inline bool prime_nozzle() {
       wait_for_release();
 
       lcd_setstatusPGM(PSTR("Done Priming"), 99);
-      lcd_quick_feedback(true);
+      lcd_quick_feedback();
       lcd_external_control = false;
     }
     else
@@ -515,7 +502,7 @@ inline bool prime_nozzle() {
   {
     #if ENABLED(ULTRA_LCD)
       lcd_setstatusPGM(PSTR("Fixed Length Prime."), 99);
-      lcd_quick_feedback(true);
+      lcd_quick_feedback();
     #endif
     set_destination_from_current();
     destination[E_AXIS] += g26_prime_length;
@@ -553,16 +540,20 @@ float valid_trig_angle(float d) {
  *  Q  Retraction multiplier
  *  R  Repetitions (number of grid points)
  *  S  Nozzle Size (diameter) in mm
+ *  T  Tool index to change to, if included
  *  U  Random deviation (50 if no value given)
  *  X  X position
  *  Y  Y position
  */
 void GcodeSuite::G26() {
-  SERIAL_ECHOLNPGM("G26 command started. Waiting for heater(s).");
+  SERIAL_ECHOLNPGM("G26 starting...");
 
   // Don't allow Mesh Validation without homing first,
   // or if the parameter parsing did not go OK, abort
   if (axis_unhomed_error()) return;
+
+  // Change the tool first, if specified
+  if (parser.seenval('T')) tool_change(parser.value_int());
 
   g26_extrusion_multiplier    = EXTRUSION_MULTIPLIER;
   g26_retraction_multiplier   = RETRACTION_MULTIPLIER;
@@ -619,7 +610,7 @@ void GcodeSuite::G26() {
 
   if (parser.seen('P')) {
     if (!parser.has_value()) {
-      #if ENABLED(ULTIPANEL)
+      #if HAS_LCD_MENU
         g26_prime_flag = -1;
       #else
         SERIAL_PROTOCOLLNPGM("?Prime length must be specified when not using an LCD.");
@@ -664,7 +655,7 @@ void GcodeSuite::G26() {
   }
 
   int16_t g26_repeats;
-  #if ENABLED(ULTIPANEL)
+  #if HAS_LCD_MENU
     g26_repeats = parser.intval('R', GRID_MAX_POINTS + 1);
   #else
     if (!parser.seen('R')) {
@@ -723,7 +714,7 @@ void GcodeSuite::G26() {
   move_to(destination, 0.0);
   move_to(destination, g26_ooze_amount);
 
-  #if ENABLED(ULTIPANEL)
+  #if HAS_LCD_MENU
     lcd_external_control = true;
   #endif
 
@@ -831,7 +822,7 @@ void GcodeSuite::G26() {
         plan_arc(endpoint, arc_offset, false);  // Draw a counter-clockwise arc
         feedrate_mm_s = save_feedrate;
         set_destination_from_current();
-        #if ENABLED(ULTIPANEL)
+        #if HAS_LCD_MENU
           if (user_canceled()) goto LEAVE; // Check if the user wants to stop the Mesh Validation
         #endif
 
@@ -857,7 +848,7 @@ void GcodeSuite::G26() {
 
         for (int8_t ind = start_ind; ind <= end_ind; ind++) {
 
-          #if ENABLED(ULTIPANEL)
+          #if HAS_LCD_MENU
             if (user_canceled()) goto LEAVE;          // Check if the user wants to stop the Mesh Validation
           #endif
 
@@ -891,6 +882,7 @@ void GcodeSuite::G26() {
 
   LEAVE:
   lcd_setstatusPGM(PSTR("Leaving G26"), -1);
+  wait_for_release();
 
   retract_filament(destination);
   destination[Z_AXIS] = Z_CLEARANCE_BETWEEN_PROBES;
@@ -906,7 +898,7 @@ void GcodeSuite::G26() {
   move_to(destination, 0); // Move back to the starting position
   //debug_current_and_destination(PSTR("done doing X/Y move."));
 
-  #if ENABLED(ULTIPANEL)
+  #if HAS_LCD_MENU
     lcd_external_control = false;     // Give back control of the LCD Panel!
   #endif
 
@@ -914,7 +906,7 @@ void GcodeSuite::G26() {
     #if HAS_HEATED_BED
       thermalManager.setTargetBed(0);
     #endif
-    thermalManager.setTargetHotend(0, 0);
+    thermalManager.setTargetHotend(active_extruder, 0);
   }
 }
 

@@ -138,7 +138,7 @@
 
     // Report if a warning was triggered
     if (data.is_otpw && st.otpw_count == 0) {
-      char timestamp[10];
+      char timestamp[14];
       duration_t elapsed = print_job_timer.duration();
       const bool has_days = (elapsed.value > 60*60*24L);
       (void)elapsed.toDigital(timestamp, has_days);
@@ -153,7 +153,7 @@
     #if CURRENT_STEP_DOWN > 0
       // Decrease current if is_otpw is true and driver is enabled and there's been more than 4 warnings
       if (data.is_otpw && st.isEnabled() && st.otpw_count > 4) {
-        st.rms_current(st.getMilliamps() - (CURRENT_STEP_DOWN));
+        st.rms_current(MAX(int16_t(st.getMilliamps() - (CURRENT_STEP_DOWN)), 0));
         #if ENABLED(REPORT_CURRENT_CHANGE)
           st.printLabel();
           SERIAL_ECHOLNPAIR(" current decreased to ", st.getMilliamps());

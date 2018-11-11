@@ -204,7 +204,7 @@ static float calibration_probe(const float &nx, const float &ny, const bool stow
   #endif
 }
 
-#if HAS_BED_PROBE && ENABLED(ULTIPANEL)
+#if HAS_BED_PROBE && HAS_LCD_MENU
   static float probe_z_shift(const float center) {
     STOW_PROBE();
     endstops.enable_z_probe(false);
@@ -588,7 +588,7 @@ void GcodeSuite::G33() {
 
       switch (probe_points) {
         case -1:
-          #if HAS_BED_PROBE && ENABLED(ULTIPANEL)
+          #if HAS_BED_PROBE && HAS_LCD_MENU
             zprobe_zoffset += probe_z_shift(z_at_pt[CEN]);
           #endif
 
@@ -643,7 +643,7 @@ void GcodeSuite::G33() {
 
     if (verbose_level != 0) {                                    // !dry run
 
-      // normalise angles to least squares
+      // Normalize angles to least-squares
       if (_angle_results) {
         float a_sum = 0.0;
         LOOP_XYZ(axis) a_sum += delta_tower_angle_trim[axis];

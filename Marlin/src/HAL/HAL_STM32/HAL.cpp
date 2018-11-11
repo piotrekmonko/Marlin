@@ -29,6 +29,9 @@
 
 #include "HAL.h"
 
+#include "../../inc/MarlinConfig.h"
+#include "../shared/Delay.h"
+
 #if ENABLED(EEPROM_EMULATED_WITH_SRAM)
   #if STM32F7xx
     #include "stm32f7xx_ll_pwr.h"
@@ -78,8 +81,19 @@ uint16_t HAL_adc_result;
 // HAL initialization task
 void HAL_init(void) {
 
+  // Needed for DELAY_NS() / DELAY_US() on CORTEX-M7
+  #if (defined(__arm__) || defined(__thumb__)) && __CORTEX_M == 7
+    enableCycleCounter();
+  #endif
+
+  FastIO_init();
+
   #if ENABLED(SDSUPPORT)
     OUT_WRITE(SDSS, HIGH); // Try to set SDSS inactive before any other SPI users start up
+  #endif
+
+  #if PIN_EXISTS(LED)
+    OUT_WRITE(LED_PIN, LOW);
   #endif
 
   #if ENABLED(EEPROM_EMULATED_WITH_SRAM)
