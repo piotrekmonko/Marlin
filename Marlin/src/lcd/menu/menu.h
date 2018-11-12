@@ -34,6 +34,7 @@ bool printer_busy();
 void lcd_completion_feedback(const bool good=true);
 void lcd_save_previous_screen();
 void lcd_goto_previous_menu();
+void lcd_menu_hop();
 #if LCD_TIMEOUT_TO_STATUS
   void lcd_goto_previous_menu_no_defer();
 #else

@@ -317,40 +317,6 @@ bool lcd_blink() {
           if (RRK(EN_REPRAPWORLD_KEYPAD_DOWN))  _reprapworld_keypad_move(Y_AXIS,  1);
           if (RRK(EN_REPRAPWORLD_KEYPAD_UP))    _reprapworld_keypad_move(Y_AXIS, -1);
         }
-
-  void _save_history() {
-    prev_history_depth = screen_history_depth;
-    prev_currentScreen = currentScreen;
-    prev_encoderPosition = encoderPosition;
-    for (uint8_t i = 0; i < COUNT(screen_history); i ++) {
-      prev_history[i].menu_function = screen_history[i].menu_function;
-      prev_history[i].encoder_position = screen_history[i].encoder_position;
-    }
-  }
-
-  void _restore_history() {
-    screen_history_depth = prev_history_depth;
-    for (uint8_t i = 0; i < COUNT(screen_history); i ++) {
-      screen_history[i].menu_function = prev_history[i].menu_function;
-      screen_history[i].encoder_position = prev_history[i].encoder_position;
-    }
-  }
-
-  void lcd_menu_hop() {
-    if (currentScreen != lcd_status_screen ) {
-      _save_history();
-      lcd_return_to_status();
-    }
-    else if (currentScreen == lcd_status_screen && prev_currentScreen != lcd_status_screen) {
-      _restore_history();
-      lcd_goto_screen(prev_currentScreen, prev_encoderPosition);
-    }
-  }
-
-  void lcd_goto_previous_menu_no_defer() {
-    defer_return_to_status = false;
-    lcd_goto_previous_menu();
-  }
       #endif // HAS_LCD_MENU
 
       if (!homed && RRK(EN_REPRAPWORLD_KEYPAD_F1)) enqueue_and_echo_commands_P(PSTR("G28"));

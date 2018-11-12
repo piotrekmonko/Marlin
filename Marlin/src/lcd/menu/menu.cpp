@@ -107,6 +107,35 @@ void lcd_goto_previous_menu() {
     lcd_return_to_status();
 }
 
+void _save_history() {
+  prev_history_depth = screen_history_depth;
+  prev_currentScreen = currentScreen;
+  prev_encoderPosition = encoderPosition;
+  for (uint8_t i = 0; i < COUNT(screen_history); i ++) {
+    prev_history[i].menu_function = screen_history[i].menu_function;
+    prev_history[i].encoder_position = screen_history[i].encoder_position;
+  }
+}
+
+void _restore_history() {
+  screen_history_depth = prev_history_depth;
+  for (uint8_t i = 0; i < COUNT(screen_history); i ++) {
+    screen_history[i].menu_function = prev_history[i].menu_function;
+    screen_history[i].encoder_position = prev_history[i].encoder_position;
+  }
+}
+
+void lcd_menu_hop() {
+  if (currentScreen != lcd_status_screen ) {
+    _save_history();
+    lcd_return_to_status();
+  }
+  else if (currentScreen == lcd_status_screen && prev_currentScreen != lcd_status_screen) {
+    _restore_history();
+    lcd_goto_screen(prev_currentScreen, prev_encoderPosition);
+  }
+}
+
 #if LCD_TIMEOUT_TO_STATUS
   void lcd_goto_previous_menu_no_defer() {
     set_defer_return_to_status(false);
