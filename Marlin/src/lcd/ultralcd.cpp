@@ -74,6 +74,10 @@
   #include "../libs/buzzer.h"
 #endif
 
+#if ENABLED(I2C_LED)
+  #include "../feature/leds/i2c_led.h"
+#endif
+
 // Buttons
 volatile uint8_t buttons;
 
@@ -480,6 +484,8 @@ void kill_screen(PGM_P lcd_msg) {
   void lcd_buzz(const long duration, const uint16_t freq) {
     #if ENABLED(LCD_USE_I2C_BUZZER)
       lcd.buzz(duration, freq);
+    #elif ENABLED(I2C_BUZZER)
+      i2c_led_buzz();
     #elif PIN_EXISTS(BEEPER)
       buzzer.tone(duration, freq);
     #endif

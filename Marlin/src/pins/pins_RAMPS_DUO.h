@@ -147,6 +147,8 @@
 
 #undef BEEPER_PIN
 //#define BEEPER_PIN       42
+//#define LCD_I2C_PANELOLU2
+//#define LCD_USE_I2C_BUZZER
 
 #undef SD_DETECT_PIN
 #define SD_DETECT_PIN    32

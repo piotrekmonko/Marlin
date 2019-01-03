@@ -38,6 +38,10 @@
   #include "pca9632.h"
 #endif
 
+#if ENABLED(I2C_LED)
+  #include "i2c_led.h"
+#endif
+
 #if ENABLED(LED_COLOR_PRESETS)
   const LEDColor LEDLights::defaultLEDColor = MakeLEDColor(
     LED_USER_PRESET_RED,
@@ -58,6 +62,9 @@ LEDLights leds;
 void LEDLights::setup() {
   #if ENABLED(NEOPIXEL_LED)
     setup_neopixel();
+  #endif
+  #if ENABLED(I2C_LED)
+    i2c_led_setup();
   #endif
   #if ENABLED(LED_USER_PRESET_STARTUP)
     set_default();
@@ -117,6 +124,10 @@ void LEDLights::set_color(const LEDColor &incol
   #if ENABLED(PCA9632)
     // Update I2C LED driver
     pca9632_set_led_color(incol);
+  #endif
+
+  #if ENABLED(I2C_LED)
+    i2c_led_set_color(incol.r, incol.g, incol.b);
   #endif
 
   #if ENABLED(LED_CONTROL_MENU) || ENABLED(PRINTER_EVENT_LEDS)

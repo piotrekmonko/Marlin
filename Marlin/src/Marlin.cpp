@@ -567,8 +567,8 @@ void idle(
     print_job_timer.tick();
   #endif
 
-  #if HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER)
-    buzzer.tick();
+  #if HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER) && PIN_EXISTS(BEEPER)
+      buzzer.tick();
   #endif
 
   #if ENABLED(I2C_POSITION_ENCODERS)

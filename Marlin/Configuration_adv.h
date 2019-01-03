@@ -243,8 +243,8 @@
 #define E4_AUTO_FAN_PIN -1
 #define E5_AUTO_FAN_PIN -1
 #define CHAMBER_AUTO_FAN_PIN -1
-#define EXTRUDER_AUTO_FAN_TEMPERATURE 40
-#define EXTRUDER_AUTO_FAN_SPEED 155   // 255 == full speed
+#define EXTRUDER_AUTO_FAN_TEMPERATURE 30
+#define EXTRUDER_AUTO_FAN_SPEED 255   // 255 == full speed
 
 /**
  * Part-Cooling Fan Multiplexer
@@ -601,7 +601,7 @@
  * LED Control Menu
  * Enable this feature to add LED Control to the LCD menu
  */
-//#define LED_CONTROL_MENU
+#define LED_CONTROL_MENU
 #if ENABLED(LED_CONTROL_MENU)
   #define LED_COLOR_PRESETS                 // Enable the Preset Color menu option
   #if ENABLED(LED_COLOR_PRESETS)
@@ -1722,8 +1722,11 @@
   #define USER_DESC_3 "Stow Z-Probe"
   #define USER_GCODE_3 "M402"
 
-  #define USER_DESC_4 "Home and Load ABL"
-  #define USER_GCODE_4 "G28\nM420 S1"
+  // #define USER_DESC_4 "Home and Load ABL"
+  // #define USER_GCODE_4 "G28\nM420 S1"
+
+  #define USER_DESC_4 "Enable debug"
+  #define USER_GCODE_4 "M111 S32"
 
   #define USER_DESC_5 "Reset EEPROM"
   #define USER_GCODE_5 "M502\nM500\nM501"
