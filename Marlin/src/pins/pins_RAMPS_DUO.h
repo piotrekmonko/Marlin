@@ -65,6 +65,9 @@
 #undef TEMP_BED_PIN
 #define TEMP_BED_PIN       10   // Analog Input
 
+#undef HEATER_BED_PIN
+#define HEATER_BED_PIN      4
+
 // SPI for Max6675 or Max31855 Thermocouple
 #undef MAX6675_SS
 #if DISABLED(SDSUPPORT)
@@ -177,10 +180,10 @@
 #define E0_ENABLE_PIN      30
 #define E0_CS_PIN          44
 
-#ifdef CONTROLLER_FAN_PIN
-  #undef CONTROLLER_FAN_PIN
-#endif
-#define CONTROLLER_FAN_PIN 4
+// #ifdef CONTROLLER_FAN_PIN
+//   #undef CONTROLLER_FAN_PIN
+// #endif
+// #define CONTROLLER_FAN_PIN 4
 
 #ifdef CASE_LIGHT_PIN
   #undef CASE_LIGHT_PIN

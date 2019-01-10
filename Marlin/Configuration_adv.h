@@ -195,7 +195,7 @@
  * The fan will turn on automatically whenever any stepper is enabled
  * and turn off after a set period after all steppers are turned off.
  */
-#define USE_CONTROLLER_FAN
+//#define USE_CONTROLLER_FAN
 #if ENABLED(USE_CONTROLLER_FAN)
   // #define CONTROLLER_FAN_PIN RAMPS_D8_PIN        // Set a custom pin for the controller fan
   #define CONTROLLERFAN_SECS 240          // Duration in seconds for the fan to run after all motors are disabled
@@ -470,7 +470,7 @@
 #define DEFAULT_MINSEGMENTTIME        20000
 
 // If defined the movements slow down when the look ahead buffer is only half full
-#define SLOWDOWN
+//#define SLOWDOWN
 
 // Frequency limit
 // See nophead's blog for more info
