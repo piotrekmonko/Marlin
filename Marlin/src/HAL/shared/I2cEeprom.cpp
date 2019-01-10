@@ -128,7 +128,7 @@ void eeprom_update_block(const void *pos, void* eeprom_address, size_t n) {
 }
 
 
-unsigned char eeprom_read_byte(unsigned char *pos) {
+uint8_t eeprom_read_byte(uint8_t *pos) {
   unsigned eeprom_address = (unsigned)pos;
 
   eeprom_init();
