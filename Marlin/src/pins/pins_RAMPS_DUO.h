@@ -63,8 +63,9 @@
 #undef TEMP_BED_PIN
 #define TEMP_BED_PIN       10   // Analog Input
 
-#undef HEATER_BED_PIN
-#define HEATER_BED_PIN      4
+// #undef HEATER_BED_PIN
+// #define HEATER_BED_PIN      4
+// #define FAN1_PIN   4
 
 // SPI for Max6675 or Max31855 Thermocouple
 #undef MAX6675_SS_PIN
