@@ -55,13 +55,16 @@
 // Temperature Sensors
 //
 #undef TEMP_0_PIN
-#define TEMP_0_PIN          9   // Analog Input
+#define TEMP_0_PIN          9
+   // Analog Input
 
 #undef TEMP_1_PIN
-#define TEMP_1_PIN         11   // Analog Input
+#define TEMP_1_PIN         11
+   // Analog Input
 
 #undef TEMP_BED_PIN
-#define TEMP_BED_PIN       10   // Analog Input
+#define TEMP_BED_PIN       10
+   // Analog Input
 
 // #undef HEATER_BED_PIN
 // #define HEATER_BED_PIN      4
@@ -70,9 +73,11 @@
 // SPI for Max6675 or Max31855 Thermocouple
 #undef MAX6675_SS_PIN
 #if DISABLED(SDSUPPORT)
-  #define MAX6675_SS_PIN   69   // Do not use pin 53 if there is even the remote possibility of using Display/SD card
+  #define MAX6675_SS_PIN   69
+  // Do not use pin 53 if there is even the remote possibility of using Display/SD card
 #else
-  #define MAX6675_SS_PIN   69   // Do not use pin 49 as this is tied to the switch inside the SD card socket to detect if there is an SD card present
+  #define MAX6675_SS_PIN   69
+  // Do not use pin 49 as this is tied to the switch inside the SD card socket to detect if there is an SD card present
 #endif
 
 //
