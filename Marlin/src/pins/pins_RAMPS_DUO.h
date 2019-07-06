@@ -137,8 +137,7 @@
 
   #endif // NEWPANEL
 
-<<<<<<< HEAD
-#endif // ULTRA_LCD
+#endif // HAS_SPI_LCD
 
 
 // panel
@@ -195,6 +194,3 @@
   #undef CASE_LIGHT_PIN
 #endif
 #define CASE_LIGHT_PIN     5
-=======
-#endif // HAS_SPI_LCD
->>>>>>> origin/bugfix-2.0.x
