@@ -93,7 +93,6 @@ FORCE_INLINE void _draw_centered_temp(const int16_t temp, const uint8_t tx, cons
 #define STATUS_HEATERS_BOT (STATUS_HEATERS_Y + STATUS_HEATERS_HEIGHT - 1)
 
 #if ENABLED(MARLIN_DEV_MODE)
-  #define SHOW_ON_STATE READ(X_MIN_PIN)
 #else
   #define SHOW_ON_STATE false
 #endif
@@ -301,7 +300,7 @@ void MarlinUI::draw_status_screen() {
   set_font(FONT_STATUSMENU);
 
   #if ENABLED(MARLIN_DEV_MODE)
-    TCNT5 = 0;
+    // TCNT5 = 0;
   #endif
 
   #if STATUS_LOGO_WIDTH
@@ -387,7 +386,7 @@ void MarlinUI::draw_status_screen() {
   }
 
   #if ENABLED(MARLIN_DEV_MODE)
-    total_cycles += TCNT5;
+    // total_cycles += TCNT5;
   #endif
 
   #if ENABLED(SDSUPPORT)

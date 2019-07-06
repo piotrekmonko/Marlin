@@ -316,7 +316,7 @@
   // Power to steppers and heaters will need to be turned on with M80.
   //#define PS_DEFAULT_OFF
 
-  //#define AUTO_POWER_CONTROL        // Enable automatic control of the PS_ON pin
+  #define AUTO_POWER_CONTROL        // Enable automatic control of the PS_ON pin
   #if ENABLED(AUTO_POWER_CONTROL)
     #define AUTO_POWER_FANS           // Turn on PSU if fans need power
     #define AUTO_POWER_E_FANS
@@ -610,7 +610,7 @@
 
   #if ENABLED(DELTA_AUTO_CALIBRATION) || ENABLED(DELTA_CALIBRATION_MENU)
     // Set the radius for the calibration probe points - max DELTA_PRINTABLE_RADIUS for non-eccentric probes
-    #define DELTA_CALIBRATION_RADIUS 50.0 // mm
+    #define DELTA_CALIBRATION_RADIUS 60.0 // mm
     // Set the steprate for papertest probing
     #define PROBE_MANUALLY_STEP 0.05 // mm
   #endif
@@ -619,15 +619,15 @@
   #define DELTA_PRINTABLE_RADIUS 60.0 // mm
 
   // Center-to-center distance of the holes in the diagonal push rods.
-  #define DELTA_DIAGONAL_ROD 167.0 // mm
+  #define DELTA_DIAGONAL_ROD 168.1 // mm
 
   // height from z=0 to home position
-  #define DELTA_HEIGHT 191.37 // get this value from auto calibrate
+  #define DELTA_HEIGHT 181.18 // get this value from auto calibrate
 
   #define DELTA_ENDSTOP_ADJ { 0.0, 0.0, 0.0 } // get these from auto calibrate
 
   // Horizontal distance bridged by diagonal push rods when effector is centered.
-  #define DELTA_RADIUS 94.77 //mm  Get this value from auto calibrate
+  #define DELTA_RADIUS 83.98 //mm  Get this value from auto calibrate
 
   // Trim adjustments for individual towers
   // tower angle corrections for X and Y tower / rotate XYZ so Z tower angle = 0
