@@ -1996,23 +1996,6 @@
 //#define LCD_FOR_MELZI
 
 //
-<<<<<<< HEAD
-// SSD1306 OLED full graphics generic display
-//
-// #define U8GLIB_SSD1306
-
-//
-// SAV OLEd LCD module support using either SSD1306 or SH1106 based LCD modules
-//
-//#define SAV_3DGLCD
-#if ENABLED(SAV_3DGLCD)
-  //#define U8GLIB_SSD1306
-  #define U8GLIB_SH1106
-#endif
-
-//
-=======
->>>>>>> 4e479caf61fde35121351e33276aed673a365b7f
 // Original Ulticontroller from Ultimaker 2 printer with SSD1309 I2C display and encoder
 // https://github.com/Ultimaker/Ultimaker2/tree/master/1249_Ulticontroller_Board_(x1)
 //
