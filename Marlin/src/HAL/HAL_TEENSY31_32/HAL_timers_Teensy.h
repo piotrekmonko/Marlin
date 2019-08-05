@@ -26,8 +26,6 @@
  * Teensy3.2 (__MK20DX256__)
  */
 
-#pragma once
-
 #include <stdint.h>
 
 // ------------------------
@@ -44,8 +42,8 @@ typedef uint32_t hal_timer_t;
 #define FTM0_TIMER_PRESCALE_BITS 0b011
 #define FTM1_TIMER_PRESCALE_BITS 0b010
 
-#define FTM0_TIMER_RATE (F_BUS / FTM0_TIMER_PRESCALE) // 60MHz / 8 = 7500kHz
-#define FTM1_TIMER_RATE (F_BUS / FTM1_TIMER_PRESCALE) // 60MHz / 4 = 15MHz
+#define FTM0_TIMER_RATE (F_BUS / (FTM0_TIMER_PRESCALE)) // 60MHz / 8 = 7500kHz
+#define FTM1_TIMER_RATE (F_BUS / (FTM1_TIMER_PRESCALE)) // 60MHz / 4 = 15MHz
 
 #define HAL_TIMER_RATE         (FTM0_TIMER_RATE)
 

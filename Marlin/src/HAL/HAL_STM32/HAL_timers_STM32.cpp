@@ -19,8 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#if defined(ARDUINO_ARCH_STM32) && !defined(STM32GENERIC)
 
+#if defined(ARDUINO_ARCH_STM32) && !defined(STM32GENERIC)
 
 #include "HAL.h"
 
@@ -32,13 +32,11 @@
 
 #define NUM_HARDWARE_TIMERS 2
 
-//#define PRESCALER 1
-
 // ------------------------
 // Private Variables
 // ------------------------
 
-stm32f4_timer_t TimerHandle[NUM_HARDWARE_TIMERS];
+stm32_timer_t TimerHandle[NUM_HARDWARE_TIMERS];
 
 // ------------------------
 // Public functions
